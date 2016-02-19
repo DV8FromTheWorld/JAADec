@@ -43,7 +43,11 @@ public class ADTSDemultiplexer {
 			left--;
 			if(i==0xFF) {
 				i = in.read();
-				if(((i>>4)&0xF)==0xF) found = true;
+				if(((i>>4)&0xF)==0xF) {
+					if ((i&8)==0)
+						found = true;
+					else break; // mp3
+				}
 				in.unread(i);
 			}
 		}
