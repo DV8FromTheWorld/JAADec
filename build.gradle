@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group 'net.sourceforge.jaadec'
-version '0.8.4'
+version '0.8.5'
 
 sourceCompatibility = 1.5
 

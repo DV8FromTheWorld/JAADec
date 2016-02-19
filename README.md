@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-  compile 'net.sourceforge.jaadec:jaad:0.8.4'
+  compile 'net.sourceforge.jaadec:jaad:0.8.5'
 }
 ```
 <p>
@@ -31,7 +31,7 @@ For Maven:
   <dependency>
     <groupId>net.sourceforge.jaadec</groupId>
     <artifactId>jaad</artifactId>
-    <version>0.8.4</version>
+    <version>0.8.5</version>
   </dependency>
 <dependencies>
 ```

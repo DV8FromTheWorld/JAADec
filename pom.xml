@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.sourceforge.jaadec</groupId>
   <artifactId>jaad</artifactId>
-  <version>0.8.4</version>
+  <version>0.8.5</version>
   <description>JAAD is an AAC decoder and MP4 demultiplexer library written completely in Java. It uses no native libraries, is platform-independent and portable. It can read MP4 container from almost every input-stream (files, network sockets etc.) and decode AAC-LC (Low Complexity) and HE-AAC (High Efficiency/AAC+).</description>
   <url>https://github.com/DV8FromTheWorld/JAADec</url>
   <licenses>
