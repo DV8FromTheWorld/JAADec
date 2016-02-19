@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.sourceforge.jaadec</groupId>
+  <artifactId>jaad</artifactId>
+  <version>0.8.4</version>
+  <description>JAAD is an AAC decoder and MP4 demultiplexer library written completely in Java. It uses no native libraries, is platform-independent and portable. It can read MP4 container from almost every input-stream (files, network sockets etc.) and decode AAC-LC (Low Complexity) and HE-AAC (High Efficiency/AAC+).</description>
+  <url>https://github.com/DV8FromTheWorld/JAADec</url>
+  <licenses>
+    <license>
+      <name>Public Domain</name>
+      <url>https://en.wikipedia.org/wiki/Public_domain</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>in-somnia</id>
+      <name>in-somnia</name>
+      <email>https://sourceforge.net/u/in-somnia/profile/</email>
+    </developer>
+    <developer>
+      <id>DV8FromTheWorld</id>
+      <name>Austin Keener</name>
+      <email>keeneraustin@yahoo.com</email>
+    </developer>
+    <developer>
+      <id>offbeatwitch</id>
+      <name>Henry</name>
+      <email>omgredstone@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git@github.com:DV8FromTheWorld/JAADec.git</connection>
+    <developerConnection>scm:git:git@github.com:DV8FromTheWorld/JAADec.git</developerConnection>
+    <url>scm:git:git@github.com:DV8FromTheWorld/JAADec.git</url>
+  </scm>
+</project>

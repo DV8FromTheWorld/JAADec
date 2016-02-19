@@ -1,0 +1,15 @@
+apply plugin: 'java'
+
+group 'net.sourceforge.jaadec'
+version '0.8.4'
+
+sourceCompatibility = 1.5
+
+jar {
+    baseName = project.name
+    manifest {
+        attributes 'Manifest-Version' : '1.0'
+        attributes 'Implementation-Version': version
+        attributes 'Main-Class': "net.sourceforge.jaad.Radio"
+    }
+}
