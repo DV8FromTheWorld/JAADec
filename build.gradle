@@ -13,3 +13,20 @@ jar {
         attributes 'Main-Class': "net.sourceforge.jaad.Radio"
     }
 }
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+tasks.withType(Zip) {
+    task ->
+
+    task.doLast {
+        ant.checksum file: it.archivePath
+    }
+}
