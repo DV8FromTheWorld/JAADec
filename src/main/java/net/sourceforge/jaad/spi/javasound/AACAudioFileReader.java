@@ -60,12 +60,42 @@ public class AACAudioFileReader extends AudioFileReader {
 	}
 
 	private AudioFileFormat getAudioFileFormat(InputStream in, int mediaLength) throws UnsupportedAudioFileException, IOException {
-		final byte[] b = new byte[8];
-		in.read(b);
+		final byte[] head = new byte[12];
+		in.read(head);
 		boolean canHandle = false;
-		if(new String(b, 4, 4).equals("ftyp")) canHandle = true;
+		if(new String(head, 4, 4).equals("ftyp"))
+			canHandle = true;
+		//This code is pulled directly from MP3-SPI.
+		else if ((head[0] == 'R') && (head[1] == 'I') && (head[2] == 'F') && (head[3] == 'F') && (head[8] == 'W') && (head[9] == 'A') && (head[10] == 'V') && (head[11] == 'E'))
+		{
+			canHandle = false;	//RIFF/WAV stream found
+		}
+		else if ((head[0] == '.') && (head[1] == 's') && (head[2] == 'n') && (head[3] == 'd'))
+		{
+			canHandle = false;	//AU stream found
+		}
+		else if ((head[0] == 'F') && (head[1] == 'O') && (head[2] == 'R') && (head[3] == 'M') && (head[8] == 'A') && (head[9] == 'I') && (head[10] == 'F') && (head[11] == 'F'))
+		{
+			canHandle = false;	//AIFF stream found
+		}
+		else if (((head[0] == 'M') | (head[0] == 'm')) && ((head[1] == 'A') | (head[1] == 'a')) && ((head[2] == 'C') | (head[2] == 'c')))
+		{
+			canHandle = false;	//APE stream found
+		}
+		else if (((head[0] == 'F') | (head[0] == 'f')) && ((head[1] == 'L') | (head[1] == 'l')) && ((head[2] == 'A') | (head[2] == 'a')) && ((head[3] == 'C') | (head[3] == 'c')))
+		{
+			canHandle = false;	//FLAC stream found
+		}
+		else if (((head[0] == 'I') | (head[0] == 'i')) && ((head[1] == 'C') | (head[1] == 'c')) && ((head[2] == 'Y') | (head[2] == 'y')))
+		{
+			canHandle = false;	//Shoutcast / ICE stream ?
+		}
+		else if (((head[0] == 'O') | (head[0] == 'o')) && ((head[1] == 'G') | (head[1] == 'g')) && ((head[2] == 'G') | (head[2] == 'g')))
+		{
+			canHandle = false;	//Ogg stream ?
+		}
 		else {
-			final BitStream bit = new BitStream(b);
+			final BitStream bit = new BitStream(head);
 			try {
 				ADTSDemultiplexer adts = new ADTSDemultiplexer(in);
 				canHandle = true;
