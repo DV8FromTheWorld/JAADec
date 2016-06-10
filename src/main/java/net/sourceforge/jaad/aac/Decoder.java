@@ -85,7 +85,7 @@ public class Decoder implements Constants {
 		}
 		catch(AACException e) {
 			if(!e.isEndOfStream()) throw e;
-			else LOGGER.warning("unexpected end of frame");
+			else LOGGER.log(Level.WARNING,"unexpected end of frame",e);
 		}
 	}
 
