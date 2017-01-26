@@ -26,8 +26,8 @@ For Maven:
     <id>central</id>
     <name>bintray</name>
     <url>http://jcenter.bintray.com</url>
-  <repository>
-<repositories>
+  </repository>
+</repositories>
 
 <dependencies>
   <dependency>
@@ -35,5 +35,5 @@ For Maven:
     <artifactId>jaad</artifactId>
     <version>0.8.5</version>
   </dependency>
-<dependencies>
+</dependencies>
 ```
