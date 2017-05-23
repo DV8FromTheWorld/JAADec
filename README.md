@@ -9,6 +9,7 @@ This library is available on Bintray's `jcenter` as a Maven/Gradle download.<br>
 https://bintray.com/dv8fromtheworld/maven/JAADec/view
 <p>
 For Gradle:
+
 ```groovy
 repositories {
   jcenter()
@@ -20,6 +21,7 @@ dependencies {
 ```
 <p>
 For Maven:
+
 ```xml
 <repositories>
   <repository>
