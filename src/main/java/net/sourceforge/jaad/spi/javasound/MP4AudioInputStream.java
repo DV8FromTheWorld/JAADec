@@ -20,12 +20,14 @@ class MP4AudioInputStream extends AsynchronousAudioInputStream {
 	private AudioFormat audioFormat;
 	private byte[] saved;
 
+	static final String ERROR_MESSAGE_AAC_TRACK_NOT_FOUND = "movie does not contain any AAC track";
+
 	MP4AudioInputStream(InputStream in, AudioFormat format, long length) throws IOException {
 		super(in, format, length);
 		final MP4Container cont = new MP4Container(in);
 		final Movie movie = cont.getMovie();
 		final List<Track> tracks = movie.getTracks(AudioTrack.AudioCodec.AAC);
-		if(tracks.isEmpty()) throw new IOException("movie does not contain any AAC track");
+		if(tracks.isEmpty()) throw new IOException(ERROR_MESSAGE_AAC_TRACK_NOT_FOUND);
 		track = (AudioTrack) tracks.get(0);
 
 		decoder = new Decoder(track.getDecoderSpecificInfo());

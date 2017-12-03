@@ -126,8 +126,12 @@ public class AACAudioFileReader extends AudioFileReader {
 			throw e;
 		}
 		catch(IOException e) {
-			in.reset();
-			throw e;
+		    if (e.getMessage().equals(MP4AudioInputStream.ERROR_MESSAGE_AAC_TRACK_NOT_FOUND)) {
+		        throw new UnsupportedAudioFileException(MP4AudioInputStream.ERROR_MESSAGE_AAC_TRACK_NOT_FOUND);
+		    } else {
+		        in.reset();
+		        throw e;
+		    }
 		}
 	}
 
