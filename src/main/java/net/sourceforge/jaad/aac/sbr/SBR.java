@@ -332,7 +332,7 @@ public class SBR implements Constants, net.sourceforge.jaad.aac.syntax.Constants
 	}
 
 	/* table 2 */
-	public int decode(BitStream ld, int cnt) throws AACException {
+	public int decode(BitStream ld, int bits) throws AACException {
 		int result = 0;
 		int num_align_bits = 0;
 		long num_sbr_bits1 = ld.getPosition();
@@ -408,7 +408,7 @@ public class SBR implements Constants, net.sourceforge.jaad.aac.syntax.Constants
 		num_sbr_bits2 = (int) (ld.getPosition()-num_sbr_bits1);
 
 		/* check if we read more bits then were available for sbr */
-		if(8*cnt<num_sbr_bits2) {
+		if(8*bits<num_sbr_bits2) {
 			throw new AACException("frame overread");
 			//faad_resetbits(ld, num_sbr_bits1+8*cnt);
 			//num_sbr_bits2 = 8*cnt;
@@ -423,13 +423,8 @@ public class SBR implements Constants, net.sourceforge.jaad.aac.syntax.Constants
 
 		{
 			/* -4 does not apply, bs_extension_type is re-read in this function */
-			num_align_bits = 8*cnt /*- 4*/-num_sbr_bits2;
-
-			while(num_align_bits>7) {
-				ld.readBits(8);
-				num_align_bits -= 8;
-			}
-			ld.readBits(num_align_bits);
+			num_align_bits = bits /*- 4*/-num_sbr_bits2;
+			ld.skipBits(num_align_bits);
 		}
 
 		return result;
