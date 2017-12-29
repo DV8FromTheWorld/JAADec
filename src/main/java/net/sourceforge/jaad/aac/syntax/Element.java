@@ -19,7 +19,7 @@ public abstract class Element implements Constants {
 
 	void decodeSBR(BitStream in, SampleFrequency sf, int count, boolean stereo, boolean crc, boolean downSampled,boolean smallFrames) throws AACException {
 		if(sbr==null) sbr = new SBR(smallFrames,elementInstanceTag==ELEMENT_CPE,sf,downSampled);
-		sbr.decode(in, count);
+		sbr.decode(in, count, crc);
 	}
 
 	boolean isSBRPresent() {
