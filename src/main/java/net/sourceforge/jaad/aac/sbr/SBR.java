@@ -406,7 +406,7 @@ public class SBR implements Constants, net.sourceforge.jaad.aac.syntax.Constants
 		num_sbr_bits2 = (int) (ld.getPosition()-num_sbr_bits1);
 
 		/* check if we read more bits then were available for sbr */
-		if(8*bits<num_sbr_bits2) {
+		if(bits<num_sbr_bits2) {
 			throw new AACException("frame overread");
 			//faad_resetbits(ld, num_sbr_bits1+8*cnt);
 			//num_sbr_bits2 = 8*cnt;
