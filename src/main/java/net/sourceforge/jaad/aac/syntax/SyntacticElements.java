@@ -256,7 +256,7 @@ public class SyntacticElements implements Constants {
 			final SBR sbr = scelfe.getSBR();
 			if(sbr.isPSUsed()) {
 				chs = 2;
-				scelfe.getSBR().process(data[channel], data[channel+1], false);
+				scelfe.getSBR().processPS(data[channel], data[channel+1], false);
 			}
 			else scelfe.getSBR().process(data[channel], false);
 		}
@@ -379,7 +379,10 @@ public class SyntacticElements implements Constants {
 	public void sendToOutput(SampleBuffer buffer) {
 		final boolean be = buffer.isBigEndian();
 
-		final int chs = data.length;
+		// always allocate at least two channels
+		// mono can't be upgraded after implicit PS occures
+		final int chs = Math.max(data.length, 2);
+
 		final int mult = (sbrPresent&&config.isSBREnabled()) ? 2 : 1;
 		final int length = mult*config.getFrameLength();
 		final int freq = mult*config.getSampleFrequency().getFrequency();
@@ -391,7 +394,8 @@ public class SyntacticElements implements Constants {
 		int i, j, off;
 		short s;
 		for(i = 0; i<chs; i++) {
-			cur = data[i];
+			// duplicate possible mono channel
+			cur = data[i<data.length?i:0];
 			for(j = 0; j<length; j++) {
 				s = (short) Math.max(Math.min(Math.round(cur[j]), Short.MAX_VALUE), Short.MIN_VALUE);
 				off = (j*chs+i)*2;
