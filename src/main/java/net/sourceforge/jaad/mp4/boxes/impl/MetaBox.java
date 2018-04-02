@@ -22,7 +22,6 @@ public class MetaBox extends FullBox {
 		long possibleType = in.peekBytes(8) & 0xFFFFFFFFL;
 		if(possibleType != BoxTypes.HANDLER_BOX){
 			super.decode(in);
-			in.skipBytes(8);
 		}
 		readChildren(in);
 	}
