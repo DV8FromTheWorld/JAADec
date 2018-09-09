@@ -16,7 +16,7 @@ class CCE extends Element implements Constants {
 		1.4142135623730950488016887f,
 		2f};
 	private final ICStream ics;
-	private float[] iqData;
+	//private float[] iqData;
 	private int couplingPoint;
 	private int coupledCount;
 	private final boolean[] channelPair;
@@ -119,12 +119,13 @@ class CCE extends Element implements Constants {
 		}
 	}
 
-	void process() throws AACException {
-		iqData = ics.getInvQuantData();
+	void process() {
+		//iqData = ics.getInvQuantData();
 	}
 
 	void applyIndependentCoupling(int index, float[] data) {
 		final double g = gain[index][0];
+		final float[] iqData = ics.getInvQuantData();
 		for(int i = 0; i<data.length; i++) {
 			data[i] += g*iqData[i];
 		}
@@ -136,6 +137,7 @@ class CCE extends Element implements Constants {
 		final int windowGroupCount = info.getWindowGroupCount();
 		final int maxSFB = info.getMaxSFB();
 		final int[] sfbCB = ics.getSfbCB();
+		final float[] iqData = ics.getInvQuantData();
 
 		int srcOff = 0;
 		int dstOff = 0;

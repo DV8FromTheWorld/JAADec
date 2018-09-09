@@ -259,7 +259,7 @@ public class ICStream implements Constants, HCB, ScaleFactorTable, IQTable {
 	 * is returned.
 	 * @return the inverse quantized and scaled data
 	 */
-	public float[] getInvQuantData() throws AACException {
+	public float[] getInvQuantData() {
 		return data;
 	}
 
