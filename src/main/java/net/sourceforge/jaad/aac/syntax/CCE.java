@@ -57,6 +57,7 @@ class CCE extends Element implements Constants {
 	}
 
 	void decode(BitStream in, DecoderConfig conf) throws AACException {
+		readElementInstanceTag(in);
 		couplingPoint = 2*in.readBit();
 		coupledCount = in.readBits(3);
 		int gainCount = 0;
