@@ -82,9 +82,7 @@ class CCE extends Element implements Constants {
 		final ICSInfo info = ics.getInfo();
 		final int windowGroupCount = info.getWindowGroupCount();
 		final int maxSFB = info.getMaxSFB();
-		//TODO:
-		final int[][] sfbCB = null;//ics.getSectionData().getSfbCB();
-
+        final int[] sfbCB = ics.getSfbCB();
 		for(i = 0; i<gainCount; i++) {
 			int idx = 0;
 			int cge = 1;
@@ -100,7 +98,7 @@ class CCE extends Element implements Constants {
 				int sfb;
 				for(int g = 0; g<windowGroupCount; g++) {
 					for(sfb = 0; sfb<maxSFB; sfb++, idx++) {
-						if(sfbCB[g][sfb]!=HCB.ZERO_HCB) {
+						if(sfbCB[idx]!=HCB.ZERO_HCB) {
 							if(cge==0) {
 								int t = Huffman.decodeScaleFactor(in)-60;
 								if(t!=0) {
@@ -137,8 +135,7 @@ class CCE extends Element implements Constants {
 		final int[] swbOffsets = info.getSWBOffsets();
 		final int windowGroupCount = info.getWindowGroupCount();
 		final int maxSFB = info.getMaxSFB();
-		//TODO:
-		final int[][] sfbCB = null; //ics.getSectionData().getSfbCB();
+		final int[] sfbCB = ics.getSfbCB();
 
 		int srcOff = 0;
 		int dstOff = 0;
@@ -148,7 +145,7 @@ class CCE extends Element implements Constants {
 		for(int g = 0; g<windowGroupCount; g++) {
 			len = info.getWindowGroupLength(g);
 			for(sfb = 0; sfb<maxSFB; sfb++, idx++) {
-				if(sfbCB[g][sfb]!=HCB.ZERO_HCB) {
+				if(sfbCB[idx]!=HCB.ZERO_HCB) {
 					x = gain[index][idx];
 					for(group = 0; group<len; group++) {
 						for(k = swbOffsets[sfb]; k<swbOffsets[sfb+1]; k++) {
