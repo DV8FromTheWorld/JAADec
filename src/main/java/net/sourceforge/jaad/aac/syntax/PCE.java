@@ -146,7 +146,17 @@ public class PCE extends Element {
 	}
 
 	public int getChannelCount() {
-		return frontChannelElementsCount+sideChannelElementsCount+backChannelElementsCount
-				+lfeChannelElementsCount+assocDataElementsCount;
+		int count = lfeChannelElementsCount+assocDataElementsCount;
+
+		for(int n=0; n<frontChannelElementsCount; ++n)
+			count += frontElements[n].isCPE ? 1 : 2;
+
+		for(int n=0; n<sideChannelElementsCount; ++n)
+			count += sideElements[n].isCPE ? 1 : 2;
+
+		for(int n=0; n<backChannelElementsCount; ++n)
+			count += backElements[n].isCPE ? 1 : 2;
+
+		return count;
 	}
 }
