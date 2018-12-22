@@ -26,12 +26,29 @@ public class BitStream {
 	}
 
 	public final void setData(byte[] data) {
-		//make the buffer size an integer number of words
-		final int size = WORD_BYTES*((data.length+WORD_BYTES-1)/WORD_BYTES);
-		//only reallocate if needed
-		if(buffer==null||buffer.length!=size) buffer = new byte[size];
-		System.arraycopy(data, 0, buffer, 0, data.length);
 		reset();
+
+		int size = data.length;
+
+		// reduce the buffer size to an integer number of words
+		int shift = size%WORD_BYTES;
+
+		// push leading bytes to cache
+		bitsCached = 8*shift;
+
+		for(int i=0; i<shift; ++i) {
+			byte c = data[i];
+			cache <<= 8;
+			cache |= 0xff & c;
+		}
+
+		size -= shift;
+
+		//only reallocate if needed
+		if(buffer==null||buffer.length!=size)
+			buffer = new byte[size];
+
+		System.arraycopy(data, shift, buffer, 0, buffer.length);
 	}
 
 	public void byteAlign() throws AACException {
