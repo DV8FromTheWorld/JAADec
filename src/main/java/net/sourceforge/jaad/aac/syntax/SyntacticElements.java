@@ -14,6 +14,7 @@ public class SyntacticElements implements Constants {
 	private DecoderConfig config;
 	private boolean sbrPresent, psPresent;
 	private int bitsRead;
+	private int frame = 0;
 	//elements
 	private final PCE pce;
 	private final Element[] elements; //SCE, LFE and CPE
@@ -46,6 +47,7 @@ public class SyntacticElements implements Constants {
 	}
 
 	public void decode(BitStream in) throws AACException {
+		++frame;
 		final int start = in.getPosition(); //should be 0
 
 		int type;
@@ -135,14 +137,14 @@ public class SyntacticElements implements Constants {
 	}
 
 	private Element decodeSCE_LFE(BitStream in) throws AACException {
-		if(elements[curElem]==null) elements[curElem] = new SCE_LFE(config.getFrameLength());
+		if(elements[curElem]==null) elements[curElem] = new SCE_LFE(config);
 		((SCE_LFE) elements[curElem]).decode(in, config);
 		curElem++;
 		return elements[curElem-1];
 	}
 
 	private Element decodeCPE(BitStream in) throws AACException {
-		if(elements[curElem]==null) elements[curElem] = new CPE(config.getFrameLength());
+		if(elements[curElem]==null) elements[curElem] = new CPE(config);
 		((CPE) elements[curElem]).decode(in, config);
 		curElem++;
 		return elements[curElem-1];
@@ -150,7 +152,7 @@ public class SyntacticElements implements Constants {
 
 	private void decodeCCE(BitStream in) throws AACException {
 		if(curCCE==MAX_ELEMENTS) throw new AACException("too much CCE elements");
-		if(cces[curCCE]==null) cces[curCCE] = new CCE(config.getFrameLength());
+		if(cces[curCCE]==null) cces[curCCE] = new CCE(config);
 		cces[curCCE].decode(in, config);
 		curCCE++;
 	}
@@ -219,7 +221,7 @@ public class SyntacticElements implements Constants {
 	private int processSingle(SCE_LFE scelfe, FilterBank filterBank, int channel, Profile profile, SampleFrequency sf) throws AACException {
 		final ICStream ics = scelfe.getICStream();
 		final ICSInfo info = ics.getInfo();
-		final LTPrediction ltp = info.getLTPrediction1();
+		final LTPrediction ltp = info.getLTPrediction();
 		final int elementID = scelfe.getElementInstanceTag();
 
 		//inverse quantization
@@ -227,7 +229,7 @@ public class SyntacticElements implements Constants {
 
 		//prediction
 		if(profile.equals(Profile.AAC_MAIN)&&info.isICPredictionPresent()) info.getICPrediction().process(ics, iqData, sf);
-		if(LTPrediction.isLTPProfile(profile)&&info.isLTPrediction1Present()) ltp.process(ics, iqData, filterBank, sf);
+		if(LTPrediction.isLTPProfile(profile)&&info.isLTPredictionPresent()) ltp.process(ics, iqData, filterBank, sf);
 
 		//dependent coupling
 		processDependentCoupling(false, elementID, CCE.BEFORE_TNS, iqData, null);
@@ -268,8 +270,8 @@ public class SyntacticElements implements Constants {
 		final ICStream ics2 = cpe.getRightChannel();
 		final ICSInfo info1 = ics1.getInfo();
 		final ICSInfo info2 = ics2.getInfo();
-		final LTPrediction ltp1 = info1.getLTPrediction1();
-		final LTPrediction ltp2 = cpe.isCommonWindow() ? info1.getLTPrediction2() : info2.getLTPrediction1();
+		final LTPrediction ltp1 = info1.getLTPrediction();
+		final LTPrediction ltp2 = info2.getLTPrediction();
 		final int elementID = cpe.getElementInstanceTag();
 
 		//inverse quantization
@@ -288,9 +290,8 @@ public class SyntacticElements implements Constants {
 
 		//LTP
 		if(LTPrediction.isLTPProfile(profile)) {
-			if(info1.isLTPrediction1Present()) ltp1.process(ics1, iqData1, filterBank, sf);
-			if(cpe.isCommonWindow()&&info1.isLTPrediction2Present()) ltp2.process(ics2, iqData2, filterBank, sf);
-			else if(info2.isLTPrediction1Present()) ltp2.process(ics2, iqData2, filterBank, sf);
+			if(info1.isLTPredictionPresent()) ltp1.process(ics1, iqData1, filterBank, sf);
+			if(info2.isLTPredictionPresent()) ltp2.process(ics2, iqData2, filterBank, sf);
 		}
 
 		//dependent coupling

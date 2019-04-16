@@ -50,8 +50,8 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 	//prediction
 	private boolean predictionDataPresent;
 	private ICPrediction icPredict;
-	boolean ltpData1Present, ltpData2Present;
-	private LTPrediction ltPredict1, ltPredict2;
+	boolean ltpDataPresent;
+	private final LTPrediction ltPredict;
 	//windows/sfbs
 	private int windowCount;
 	private int windowGroupCount;
@@ -59,13 +59,17 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 	private int swbCount;
 	private int[] swbOffsets;
 
-	public ICSInfo(int frameLength) {
-		this.frameLength = frameLength;
+	public ICSInfo(DecoderConfig config) {
+		this.frameLength = config.getFrameLength();
 		windowShape = new int[2];
 		windowSequence = WindowSequence.ONLY_LONG_SEQUENCE;
 		windowGroupLength = new int[MAX_WINDOW_GROUP_COUNT];
-		ltpData1Present = false;
-		ltpData2Present = false;
+		ltpDataPresent = false;
+
+		if(LTPrediction.isLTPProfile(config.getProfile()))
+			ltPredict = new LTPrediction(frameLength);
+		else
+			ltPredict = null;
 	}
 
 	/* ========== decoding ========== */
@@ -80,6 +84,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 
 		windowGroupCount = 1;
 		windowGroupLength[0] = 1;
+
 		if(windowSequence.equals(WindowSequence.EIGHT_SHORT_SEQUENCE)) {
 			maxSFB = in.readBits(4);
 			int i;
@@ -93,7 +98,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 			windowCount = 8;
 			swbOffsets = SWB_OFFSET_SHORT_WINDOW[sf.getIndex()];
 			swbCount = SWB_SHORT_WINDOW_COUNT[sf.getIndex()];
-			predictionDataPresent = false;
+			ltpDataPresent = false;
 		}
 		else {
 			maxSFB = in.readBits(6);
@@ -102,6 +107,8 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 			swbCount = SWB_LONG_WINDOW_COUNT[sf.getIndex()];
 			predictionDataPresent = in.readBool();
 			if(predictionDataPresent) readPredictionData(in, conf.getProfile(), sf, commonWindow);
+			else
+				ltpDataPresent = false;
 		}
 	}
 
@@ -112,22 +119,14 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 				icPredict.decode(in, maxSFB, sf);
 				break;
 			case AAC_LTP:
-				if(ltpData1Present = in.readBool()) {
-					if(ltPredict1==null) ltPredict1 = new LTPrediction(frameLength);
-					ltPredict1.decode(in, this, profile);
-				}
-				if(commonWindow) {
-					if(ltpData2Present = in.readBool()) {
-						if(ltPredict2==null) ltPredict2 = new LTPrediction(frameLength);
-						ltPredict2.decode(in, this, profile);
-					}
+				if(ltpDataPresent = in.readBool()) {
+					ltPredict.decode(in, this, profile);
 				}
 				break;
 			case ER_AAC_LTP:
 				if(!commonWindow) {
-					if(ltpData1Present = in.readBool()) {
-						if(ltPredict1==null) ltPredict1 = new LTPrediction(frameLength);
-						ltPredict1.decode(in, this, profile);
+					if(ltpDataPresent = in.readBool()) {
+						ltPredict.decode(in, this, profile);
 					}
 				}
 				break;
@@ -185,44 +184,39 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		return icPredict;
 	}
 
-	public boolean isLTPrediction1Present() {
-		return ltpData1Present;
+	public boolean isLTPredictionPresent() {
+		return ltpDataPresent;
 	}
 
-	public LTPrediction getLTPrediction1() {
-		return ltPredict1;
+	public LTPrediction getLTPrediction() {
+		return ltPredict;
 	}
 
-	public boolean isLTPrediction2Present() {
-		return ltpData2Present;
-	}
-
-	public LTPrediction getLTPrediction2() {
-		return ltPredict2;
-	}
 
 	public void unsetPredictionSFB(int sfb) {
 		if(predictionDataPresent) icPredict.setPredictionUnused(sfb);
-		if(ltpData1Present) ltPredict1.setPredictionUnused(sfb);
-		if(ltpData2Present) ltPredict2.setPredictionUnused(sfb);
+		if(ltpDataPresent) ltPredict.setPredictionUnused(sfb);
 	}
 
-	public void setData(ICSInfo info) {
+	public void setData(BitStream in, DecoderConfig conf, ICSInfo info) throws AACException {
 		windowSequence = WindowSequence.valueOf(info.windowSequence.name());
 		windowShape[PREVIOUS] = windowShape[CURRENT];
 		windowShape[CURRENT] = info.windowShape[CURRENT];
 		maxSFB = info.maxSFB;
 		predictionDataPresent = info.predictionDataPresent;
 		if(predictionDataPresent) icPredict = info.icPredict;
-		ltpData1Present = info.ltpData1Present;
-		if(ltpData1Present) {
-			ltPredict1.copy(info.ltPredict1);
-			ltPredict2.copy(info.ltPredict2);
-		}
+
 		windowCount = info.windowCount;
 		windowGroupCount = info.windowGroupCount;
 		windowGroupLength = Arrays.copyOf(info.windowGroupLength, info.windowGroupLength.length);
 		swbCount = info.swbCount;
 		swbOffsets = Arrays.copyOf(info.swbOffsets, info.swbOffsets.length);
+
+		if(predictionDataPresent) {
+			if (ltpDataPresent = in.readBool()) {
+				ltPredict.decode(in, this, conf.getProfile());
+			}
+		} else
+			ltpDataPresent = false;
 	}
 }

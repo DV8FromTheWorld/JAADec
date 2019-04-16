@@ -38,9 +38,9 @@ public class ICStream implements Constants, HCB, ScaleFactorTable, IQTable {
 	private int reorderedSpectralDataLen, longestCodewordLen;
 	private RVLC rvlc;
 
-	public ICStream(int frameLength) {
-		this.frameLength = frameLength;
-		info = new ICSInfo(frameLength);
+	public ICStream(DecoderConfig config) {
+		this.frameLength = config.getFrameLength();
+		info = new ICSInfo(config);
 		sfbCB = new int[MAX_SECTIONS];
 		sectEnd = new int[MAX_SECTIONS];
 		data = new float[frameLength];

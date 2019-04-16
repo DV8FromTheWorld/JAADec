@@ -27,9 +27,9 @@ class CCE extends Element implements Constants {
 	 */
 	private final float[][] gain;
 
-	CCE(int frameLength) {
+	CCE(DecoderConfig config) {
 		super();
-		ics = new ICStream(frameLength);
+		ics = new ICStream(config);
 		channelPair = new boolean[8];
 		idSelect = new int[8];
 		chSelect = new int[8];

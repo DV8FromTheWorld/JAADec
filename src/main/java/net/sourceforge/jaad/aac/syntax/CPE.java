@@ -14,11 +14,11 @@ public class CPE extends Element implements Constants {
 	private boolean commonWindow;
 	ICStream icsL, icsR;
 
-	CPE(int frameLength) {
+	CPE(DecoderConfig config) {
 		super();
 		msUsed = new boolean[MAX_MS_MASK];
-		icsL = new ICStream(frameLength);
-		icsR = new ICStream(frameLength);
+		icsL = new ICStream(config);
+		icsR = new ICStream(config);
 	}
 
 	void decode(BitStream in, DecoderConfig conf) throws AACException {
@@ -32,7 +32,7 @@ public class CPE extends Element implements Constants {
 		final ICSInfo info = icsL.getInfo();
 		if(commonWindow) {
 			info.decode(in, conf, commonWindow);
-			icsR.getInfo().setData(info);
+			icsR.getInfo().setData(in, conf, info);
 
 			msMask = MSMask.forInt(in.readBits(2));
 			if(msMask.equals(MSMask.TYPE_USED)) {
@@ -52,8 +52,9 @@ public class CPE extends Element implements Constants {
 			Arrays.fill(msUsed, false);
 		}
 
-		if(profile.isErrorResilientProfile()&&(info.isLTPrediction1Present())) {
-			if(info.ltpData2Present = in.readBool()) info.getLTPrediction2().decode(in, info, profile);
+		if(profile.isErrorResilientProfile()&&(info.isLTPredictionPresent())) {
+			ICSInfo infoR = icsR.getInfo();
+			if(infoR.ltpDataPresent = in.readBool()) infoR.getLTPrediction().decode(in, info, profile);
 		}
 
 		icsL.decode(in, commonWindow, conf);
