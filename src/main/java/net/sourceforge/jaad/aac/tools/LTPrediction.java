@@ -26,6 +26,9 @@ public class LTPrediction implements Constants {
 		1.194601f,
 		1.369533f
 	};
+
+	private boolean isPresent = false;
+
 	private final int frameLength;
 	private final int[] states;
 	private int coef, lag, lastBand;
@@ -38,8 +41,18 @@ public class LTPrediction implements Constants {
 		states = new int[4*frameLength];
 	}
 
+	public boolean isPresent() {
+		return isPresent;
+	}
+
 	public void decode(BitStream in, ICSInfo info, Profile profile) throws AACException {
 		lag = 0;
+
+		isPresent = in.readBool();
+		if(!isPresent) {
+			return;
+		}
+
 		if(profile.equals(Profile.AAC_LD)) {
 			lagUpdate = in.readBool();
 			if(lagUpdate) lag = in.readBits(10);
@@ -75,6 +88,10 @@ public class LTPrediction implements Constants {
 	}
 
 	public void process(ICStream ics, float[] data, FilterBank filterBank, SampleFrequency sf) {
+
+		if(!isPresent)
+			return;
+
 		final ICSInfo info = ics.getInfo();
 
 		if(!info.isEightShortFrame()) {
@@ -124,6 +141,7 @@ public class LTPrediction implements Constants {
 				states[(frameLength*2)+i] = Math.round(overlap[i]);
 			}
 		}
+		isPresent = false;
 	}
 
 	public static boolean isLTPProfile(Profile profile) {

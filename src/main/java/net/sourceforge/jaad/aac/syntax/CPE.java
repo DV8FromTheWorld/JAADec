@@ -5,6 +5,7 @@ import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.DecoderConfig;
 import net.sourceforge.jaad.aac.Profile;
 import net.sourceforge.jaad.aac.SampleFrequency;
+import net.sourceforge.jaad.aac.tools.LTPrediction;
 import net.sourceforge.jaad.aac.tools.MSMask;
 
 public class CPE extends Element implements Constants {
@@ -52,9 +53,9 @@ public class CPE extends Element implements Constants {
 			Arrays.fill(msUsed, false);
 		}
 
-		if(profile.isErrorResilientProfile()&&(info.isLTPredictionPresent())) {
-			ICSInfo infoR = icsR.getInfo();
-			if(infoR.ltpDataPresent = in.readBool()) infoR.getLTPrediction().decode(in, info, profile);
+		if(profile.isErrorResilientProfile()) {
+			LTPrediction ltp = icsR.getInfo().getLTPrediction();
+			if(ltp!=null) ltp.decode(in, info, profile);
 		}
 
 		icsL.decode(in, commonWindow, conf);

@@ -50,7 +50,6 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 	//prediction
 	private boolean predictionDataPresent;
 	private ICPrediction icPredict;
-	boolean ltpDataPresent;
 	private final LTPrediction ltPredict;
 	//windows/sfbs
 	private int windowCount;
@@ -64,7 +63,6 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		windowShape = new int[2];
 		windowSequence = WindowSequence.ONLY_LONG_SEQUENCE;
 		windowGroupLength = new int[MAX_WINDOW_GROUP_COUNT];
-		ltpDataPresent = false;
 
 		if(LTPrediction.isLTPProfile(config.getProfile()))
 			ltPredict = new LTPrediction(frameLength);
@@ -98,7 +96,6 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 			windowCount = 8;
 			swbOffsets = SWB_OFFSET_SHORT_WINDOW[sf.getIndex()];
 			swbCount = SWB_SHORT_WINDOW_COUNT[sf.getIndex()];
-			ltpDataPresent = false;
 		}
 		else {
 			maxSFB = in.readBits(6);
@@ -107,8 +104,6 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 			swbCount = SWB_LONG_WINDOW_COUNT[sf.getIndex()];
 			predictionDataPresent = in.readBool();
 			if(predictionDataPresent) readPredictionData(in, conf.getProfile(), sf, commonWindow);
-			else
-				ltpDataPresent = false;
 		}
 	}
 
@@ -119,15 +114,12 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 				icPredict.decode(in, maxSFB, sf);
 				break;
 			case AAC_LTP:
-				if(ltpDataPresent = in.readBool()) {
-					ltPredict.decode(in, this, profile);
-				}
+				ltPredict.decode(in, this, profile);
+
 				break;
 			case ER_AAC_LTP:
 				if(!commonWindow) {
-					if(ltpDataPresent = in.readBool()) {
-						ltPredict.decode(in, this, profile);
-					}
+					ltPredict.decode(in, this, profile);
 				}
 				break;
 			default:
@@ -184,10 +176,6 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		return icPredict;
 	}
 
-	public boolean isLTPredictionPresent() {
-		return ltpDataPresent;
-	}
-
 	public LTPrediction getLTPrediction() {
 		return ltPredict;
 	}
@@ -195,7 +183,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 
 	public void unsetPredictionSFB(int sfb) {
 		if(predictionDataPresent) icPredict.setPredictionUnused(sfb);
-		if(ltpDataPresent) ltPredict.setPredictionUnused(sfb);
+		if(ltPredict!=null) ltPredict.setPredictionUnused(sfb);
 	}
 
 	public void setData(BitStream in, DecoderConfig conf, ICSInfo info) throws AACException {
@@ -213,10 +201,7 @@ public class ICSInfo implements Constants, ScaleFactorBands {
 		swbOffsets = Arrays.copyOf(info.swbOffsets, info.swbOffsets.length);
 
 		if(predictionDataPresent) {
-			if (ltpDataPresent = in.readBool()) {
-				ltPredict.decode(in, this, conf.getProfile());
-			}
-		} else
-			ltpDataPresent = false;
+			ltPredict.decode(in, this, conf.getProfile());
+		}
 	}
 }

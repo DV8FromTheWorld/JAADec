@@ -229,7 +229,7 @@ public class SyntacticElements implements Constants {
 
 		//prediction
 		if(profile.equals(Profile.AAC_MAIN)&&info.isICPredictionPresent()) info.getICPrediction().process(ics, iqData, sf);
-		if(LTPrediction.isLTPProfile(profile)&&info.isLTPredictionPresent()) ltp.process(ics, iqData, filterBank, sf);
+		if(ltp!=null) ltp.process(ics, iqData, filterBank, sf);
 
 		//dependent coupling
 		processDependentCoupling(false, elementID, CCE.BEFORE_TNS, iqData, null);
@@ -243,7 +243,7 @@ public class SyntacticElements implements Constants {
 		//filterbank
 		filterBank.process(info.getWindowSequence(), info.getWindowShape(ICSInfo.CURRENT), info.getWindowShape(ICSInfo.PREVIOUS), iqData, data[channel], channel);
 
-		if(LTPrediction.isLTPProfile(profile)) ltp.updateState(data[channel], filterBank.getOverlap(channel), profile);
+		if(ltp!=null) ltp.updateState(data[channel], filterBank.getOverlap(channel), profile);
 
 		//dependent coupling
 		processIndependentCoupling(false, elementID, data[channel], null);
@@ -289,10 +289,8 @@ public class SyntacticElements implements Constants {
 		IS.process(cpe, iqData1, iqData2);
 
 		//LTP
-		if(LTPrediction.isLTPProfile(profile)) {
-			if(info1.isLTPredictionPresent()) ltp1.process(ics1, iqData1, filterBank, sf);
-			if(info2.isLTPredictionPresent()) ltp2.process(ics2, iqData2, filterBank, sf);
-		}
+		if(ltp1!=null) ltp1.process(ics1, iqData1, filterBank, sf);
+		if(ltp2!=null) ltp2.process(ics2, iqData2, filterBank, sf);
 
 		//dependent coupling
 		processDependentCoupling(true, elementID, CCE.BEFORE_TNS, iqData1, iqData2);
@@ -308,10 +306,8 @@ public class SyntacticElements implements Constants {
 		filterBank.process(info1.getWindowSequence(), info1.getWindowShape(ICSInfo.CURRENT), info1.getWindowShape(ICSInfo.PREVIOUS), iqData1, data[channel], channel);
 		filterBank.process(info2.getWindowSequence(), info2.getWindowShape(ICSInfo.CURRENT), info2.getWindowShape(ICSInfo.PREVIOUS), iqData2, data[channel+1], channel+1);
 
-		if(LTPrediction.isLTPProfile(profile)) {
-			ltp1.updateState(data[channel], filterBank.getOverlap(channel), profile);
-			ltp2.updateState(data[channel+1], filterBank.getOverlap(channel+1), profile);
-		}
+		if(ltp1!=null) ltp1.updateState(data[channel], filterBank.getOverlap(channel), profile);
+		if(ltp2!=null) ltp2.updateState(data[channel+1], filterBank.getOverlap(channel+1), profile);
 
 		//independent coupling
 		processIndependentCoupling(true, elementID, data[channel], data[channel+1]);
