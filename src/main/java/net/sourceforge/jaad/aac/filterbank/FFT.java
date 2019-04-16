@@ -41,7 +41,7 @@ class FFT implements FFTTables {
 
 	void process(float[][] in, boolean forward) {
 		final int imOff = (forward ? 2 : 1);
-		final int scale = (forward ? length: 1);
+		final int scale = (forward ? 1: 1);
 		//bit-reversal
 		int ii = 0;
 		for(int i = 0; i<length; i++) {
