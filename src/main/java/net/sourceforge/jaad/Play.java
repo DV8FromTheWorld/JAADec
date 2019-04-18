@@ -7,7 +7,9 @@ import net.sourceforge.jaad.adts.ADTSDemultiplexer;
 import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.*;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.net.URL;
 import java.util.List;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -86,11 +88,18 @@ public class Play {
 		}
 	}
 
-	private static void decodeAAC(String in) throws Exception {
+    private static void decodeAAC(String in) throws Exception {
+	    if(in.startsWith("http:"))
+	        decodeAAC(new URL(in).openStream());
+        else
+	        decodeAAC(new FileInputStream(in));
+    }
+
+	private static void decodeAAC(InputStream in) throws Exception {
 		SourceDataLine line = null;
 		byte[] b;
 		try {
-			final ADTSDemultiplexer adts = new ADTSDemultiplexer(new FileInputStream(in));
+			final ADTSDemultiplexer adts = new ADTSDemultiplexer(in);
 			final Decoder dec = new Decoder(adts.getDecoderSpecificInfo());
 			final SampleBuffer buf = new SampleBuffer();
 			while(true) {

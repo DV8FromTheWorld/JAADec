@@ -27,7 +27,7 @@ class Filterbank implements PSTables {
 
 		this.work = new float[(this.frame_len+12)][2];
 
-		this.buffer = new float[5][2][2];
+		this.buffer = new float[5][frame_len][2];
 
 		temp = new float[frame_len][12][2];
 	}

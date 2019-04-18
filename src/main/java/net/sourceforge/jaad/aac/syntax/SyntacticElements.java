@@ -14,6 +14,7 @@ public class SyntacticElements implements Constants {
 	private DecoderConfig config;
 	private boolean sbrPresent, psPresent;
 	private int bitsRead;
+	private int frame = 0;
 	//elements
 	private final PCE pce;
 	private final Element[] elements; //SCE, LFE and CPE
@@ -46,6 +47,7 @@ public class SyntacticElements implements Constants {
 	}
 
 	public void decode(BitStream in) throws AACException {
+		++frame;
 		final int start = in.getPosition(); //should be 0
 
 		int type;
@@ -135,14 +137,14 @@ public class SyntacticElements implements Constants {
 	}
 
 	private Element decodeSCE_LFE(BitStream in) throws AACException {
-		if(elements[curElem]==null) elements[curElem] = new SCE_LFE(config.getFrameLength());
+		if(elements[curElem]==null) elements[curElem] = new SCE_LFE(config);
 		((SCE_LFE) elements[curElem]).decode(in, config);
 		curElem++;
 		return elements[curElem-1];
 	}
 
 	private Element decodeCPE(BitStream in) throws AACException {
-		if(elements[curElem]==null) elements[curElem] = new CPE(config.getFrameLength());
+		if(elements[curElem]==null) elements[curElem] = new CPE(config);
 		((CPE) elements[curElem]).decode(in, config);
 		curElem++;
 		return elements[curElem-1];
@@ -150,7 +152,7 @@ public class SyntacticElements implements Constants {
 
 	private void decodeCCE(BitStream in) throws AACException {
 		if(curCCE==MAX_ELEMENTS) throw new AACException("too much CCE elements");
-		if(cces[curCCE]==null) cces[curCCE] = new CCE(config.getFrameLength());
+		if(cces[curCCE]==null) cces[curCCE] = new CCE(config);
 		cces[curCCE].decode(in, config);
 		curCCE++;
 	}
@@ -219,7 +221,7 @@ public class SyntacticElements implements Constants {
 	private int processSingle(SCE_LFE scelfe, FilterBank filterBank, int channel, Profile profile, SampleFrequency sf) throws AACException {
 		final ICStream ics = scelfe.getICStream();
 		final ICSInfo info = ics.getInfo();
-		final LTPrediction ltp = info.getLTPrediction1();
+		final LTPrediction ltp = info.getLTPrediction();
 		final int elementID = scelfe.getElementInstanceTag();
 
 		//inverse quantization
@@ -227,7 +229,7 @@ public class SyntacticElements implements Constants {
 
 		//prediction
 		if(profile.equals(Profile.AAC_MAIN)&&info.isICPredictionPresent()) info.getICPrediction().process(ics, iqData, sf);
-		if(LTPrediction.isLTPProfile(profile)&&info.isLTPrediction1Present()) ltp.process(ics, iqData, filterBank, sf);
+		if(ltp!=null) ltp.process(ics, iqData, filterBank, sf);
 
 		//dependent coupling
 		processDependentCoupling(false, elementID, CCE.BEFORE_TNS, iqData, null);
@@ -241,7 +243,7 @@ public class SyntacticElements implements Constants {
 		//filterbank
 		filterBank.process(info.getWindowSequence(), info.getWindowShape(ICSInfo.CURRENT), info.getWindowShape(ICSInfo.PREVIOUS), iqData, data[channel], channel);
 
-		if(LTPrediction.isLTPProfile(profile)) ltp.updateState(data[channel], filterBank.getOverlap(channel), profile);
+		if(ltp!=null) ltp.updateState(data[channel], filterBank.getOverlap(channel), profile);
 
 		//dependent coupling
 		processIndependentCoupling(false, elementID, data[channel], null);
@@ -256,7 +258,7 @@ public class SyntacticElements implements Constants {
 			final SBR sbr = scelfe.getSBR();
 			if(sbr.isPSUsed()) {
 				chs = 2;
-				scelfe.getSBR().process(data[channel], data[channel+1], false);
+				scelfe.getSBR().processPS(data[channel], data[channel+1], false);
 			}
 			else scelfe.getSBR().process(data[channel], false);
 		}
@@ -268,8 +270,8 @@ public class SyntacticElements implements Constants {
 		final ICStream ics2 = cpe.getRightChannel();
 		final ICSInfo info1 = ics1.getInfo();
 		final ICSInfo info2 = ics2.getInfo();
-		final LTPrediction ltp1 = info1.getLTPrediction1();
-		final LTPrediction ltp2 = cpe.isCommonWindow() ? info1.getLTPrediction2() : info2.getLTPrediction1();
+		final LTPrediction ltp1 = info1.getLTPrediction();
+		final LTPrediction ltp2 = info2.getLTPrediction();
 		final int elementID = cpe.getElementInstanceTag();
 
 		//inverse quantization
@@ -287,11 +289,8 @@ public class SyntacticElements implements Constants {
 		IS.process(cpe, iqData1, iqData2);
 
 		//LTP
-		if(LTPrediction.isLTPProfile(profile)) {
-			if(info1.isLTPrediction1Present()) ltp1.process(ics1, iqData1, filterBank, sf);
-			if(cpe.isCommonWindow()&&info1.isLTPrediction2Present()) ltp2.process(ics2, iqData2, filterBank, sf);
-			else if(info2.isLTPrediction1Present()) ltp2.process(ics2, iqData2, filterBank, sf);
-		}
+		if(ltp1!=null) ltp1.process(ics1, iqData1, filterBank, sf);
+		if(ltp2!=null) ltp2.process(ics2, iqData2, filterBank, sf);
 
 		//dependent coupling
 		processDependentCoupling(true, elementID, CCE.BEFORE_TNS, iqData1, iqData2);
@@ -307,10 +306,8 @@ public class SyntacticElements implements Constants {
 		filterBank.process(info1.getWindowSequence(), info1.getWindowShape(ICSInfo.CURRENT), info1.getWindowShape(ICSInfo.PREVIOUS), iqData1, data[channel], channel);
 		filterBank.process(info2.getWindowSequence(), info2.getWindowShape(ICSInfo.CURRENT), info2.getWindowShape(ICSInfo.PREVIOUS), iqData2, data[channel+1], channel+1);
 
-		if(LTPrediction.isLTPProfile(profile)) {
-			ltp1.updateState(data[channel], filterBank.getOverlap(channel), profile);
-			ltp2.updateState(data[channel+1], filterBank.getOverlap(channel+1), profile);
-		}
+		if(ltp1!=null) ltp1.updateState(data[channel], filterBank.getOverlap(channel), profile);
+		if(ltp2!=null) ltp2.updateState(data[channel+1], filterBank.getOverlap(channel+1), profile);
 
 		//independent coupling
 		processIndependentCoupling(true, elementID, data[channel], data[channel+1]);
@@ -379,7 +376,10 @@ public class SyntacticElements implements Constants {
 	public void sendToOutput(SampleBuffer buffer) {
 		final boolean be = buffer.isBigEndian();
 
-		final int chs = data.length;
+		// always allocate at least two channels
+		// mono can't be upgraded after implicit PS occures
+		final int chs = Math.max(data.length, 2);
+
 		final int mult = (sbrPresent&&config.isSBREnabled()) ? 2 : 1;
 		final int length = mult*config.getFrameLength();
 		final int freq = mult*config.getSampleFrequency().getFrequency();
@@ -391,7 +391,8 @@ public class SyntacticElements implements Constants {
 		int i, j, off;
 		short s;
 		for(i = 0; i<chs; i++) {
-			cur = data[i];
+			// duplicate possible mono channel
+			cur = data[i<data.length?i:0];
 			for(j = 0; j<length; j++) {
 				s = (short) Math.max(Math.min(Math.round(cur[j]), Short.MAX_VALUE), Short.MIN_VALUE);
 				off = (j*chs+i)*2;

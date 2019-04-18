@@ -188,7 +188,7 @@ public class DecoderConfig implements Constants {
 
 					if(config.channelConfiguration==ChannelConfiguration.CHANNEL_CONFIG_NONE) {
 						//TODO: is this working correct? -> ISO 14496-3 part 1: 1.A.4.3
-						in.skipBits(3); //PCE
+						//in.skipBits(3); //PCE
 						PCE pce = new PCE();
 						pce.decode(in);
 						config.profile = pce.getProfile();

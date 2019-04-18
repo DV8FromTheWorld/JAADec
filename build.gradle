@@ -3,7 +3,7 @@ apply plugin: 'java'
 group 'net.sourceforge.jaadec'
 version '0.8.6'
 
-sourceCompatibility = 1.5
+sourceCompatibility = 1.6
 
 jar {
     baseName = project.name

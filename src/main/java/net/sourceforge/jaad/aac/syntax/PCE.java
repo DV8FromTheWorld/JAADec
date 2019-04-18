@@ -78,7 +78,7 @@ public class PCE extends Element {
 	public void decode(BitStream in) throws AACException {
 		readElementInstanceTag(in);
 
-		profile = Profile.forInt(in.readBits(2));
+		profile = Profile.forInt(1+in.readBits(2));
 
 		sampleFrequency = SampleFrequency.forInt(in.readBits(4));
 
@@ -146,7 +146,17 @@ public class PCE extends Element {
 	}
 
 	public int getChannelCount() {
-		return frontChannelElementsCount+sideChannelElementsCount+backChannelElementsCount
-				+lfeChannelElementsCount+assocDataElementsCount;
+		int count = lfeChannelElementsCount+assocDataElementsCount;
+
+		for(int n=0; n<frontChannelElementsCount; ++n)
+			count += frontElements[n].isCPE ? 2 : 1;
+
+		for(int n=0; n<sideChannelElementsCount; ++n)
+			count += sideElements[n].isCPE ? 2 : 1;
+
+		for(int n=0; n<backChannelElementsCount; ++n)
+			count += backElements[n].isCPE ? 2 : 1;
+
+		return count;
 	}
 }

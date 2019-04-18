@@ -11,6 +11,8 @@ class DSE extends Element {
 	}
 
 	void decode(BitStream in) throws AACException {
+		readElementInstanceTag(in);
+
 		final boolean byteAlign = in.readBool();
 		int count = in.readBits(8);
 		if(count==255) count += in.readBits(8);

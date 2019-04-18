@@ -5,6 +5,7 @@ import net.sourceforge.jaad.aac.AACException;
 import net.sourceforge.jaad.aac.DecoderConfig;
 import net.sourceforge.jaad.aac.Profile;
 import net.sourceforge.jaad.aac.SampleFrequency;
+import net.sourceforge.jaad.aac.tools.LTPrediction;
 import net.sourceforge.jaad.aac.tools.MSMask;
 
 public class CPE extends Element implements Constants {
@@ -14,11 +15,11 @@ public class CPE extends Element implements Constants {
 	private boolean commonWindow;
 	ICStream icsL, icsR;
 
-	CPE(int frameLength) {
+	CPE(DecoderConfig config) {
 		super();
 		msUsed = new boolean[MAX_MS_MASK];
-		icsL = new ICStream(frameLength);
-		icsR = new ICStream(frameLength);
+		icsL = new ICStream(config);
+		icsR = new ICStream(config);
 	}
 
 	void decode(BitStream in, DecoderConfig conf) throws AACException {
@@ -32,7 +33,7 @@ public class CPE extends Element implements Constants {
 		final ICSInfo info = icsL.getInfo();
 		if(commonWindow) {
 			info.decode(in, conf, commonWindow);
-			icsR.getInfo().setData(info);
+			icsR.getInfo().setData(in, conf, info);
 
 			msMask = MSMask.forInt(in.readBits(2));
 			if(msMask.equals(MSMask.TYPE_USED)) {
@@ -52,8 +53,9 @@ public class CPE extends Element implements Constants {
 			Arrays.fill(msUsed, false);
 		}
 
-		if(profile.isErrorResilientProfile()&&(info.isLTPrediction1Present())) {
-			if(info.ltpData2Present = in.readBool()) info.getLTPrediction2().decode(in, info, profile);
+		if(profile.isErrorResilientProfile()) {
+			LTPrediction ltp = icsR.getInfo().getLTPrediction();
+			if(ltp!=null) ltp.decode(in, info, profile);
 		}
 
 		icsL.decode(in, commonWindow, conf);

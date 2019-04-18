@@ -38,7 +38,7 @@ public class MP4InputStream {
 	 * <code>RandomAccessFile</code>. It will have random access and seeking 
 	 * will be possible.
 	 * 
-	 * @param in a <code>RandomAccessFile</code> to read from
+	 * @param fin a <code>RandomAccessFile</code> to read from
 	 */
 	MP4InputStream(RandomAccessFile fin) {
 		this.fin = fin;
@@ -64,12 +64,7 @@ public class MP4InputStream {
 			i = in.read();
 		}
 		else if(fin!=null){
-			long currentFilePointer = fin.getFilePointer();
-			try{
-				i = fin.read();
-			}finally{
-				fin.seek(currentFilePointer);
-			}
+			i = fin.read();
 		}
 
 		if(i==-1){
@@ -104,9 +99,9 @@ public class MP4InputStream {
 		if(i==-1){
 			throw new EOFException();
 		}
-		else if(in!=null){
-			offset++;
-		}
+		
+		offset++;
+
 		return i;
 	}
 
@@ -135,11 +130,7 @@ public class MP4InputStream {
 			read++;
 		}
 
-		long currentFilePointer=-1;
-		if(fin!=null){
-			currentFilePointer = fin.getFilePointer();
-		}
-		try{
+		{
 			while(read<len) {
 				if(in!=null){
 					i = in.read(b, off+read, len-read);
@@ -156,10 +147,6 @@ public class MP4InputStream {
 					}
 					read += i;
 				}
-			}
-		}finally{
-			if(fin!=null){
-				fin.seek(currentFilePointer);
 			}
 		}
 	}
@@ -434,10 +421,7 @@ public class MP4InputStream {
 	 * @throws IOException if an I/O error occurs (only when using a RandomAccessFile)
 	 */
 	public long getOffset() throws IOException {
-		long l = -1;
-		if(in!=null) l = offset;
-		else if(fin!=null) l = fin.getFilePointer();
-		return l;
+		return offset;
 	}
 
 	/**

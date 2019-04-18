@@ -7,9 +7,9 @@ class SCE_LFE extends Element {
 
 	private final ICStream ics;
 
-	SCE_LFE(int frameLength) {
+	SCE_LFE(DecoderConfig config) {
 		super();
-		ics = new ICStream(frameLength);
+		ics = new ICStream(config);
 	}
 
 	void decode(BitStream in, DecoderConfig conf) throws AACException {
