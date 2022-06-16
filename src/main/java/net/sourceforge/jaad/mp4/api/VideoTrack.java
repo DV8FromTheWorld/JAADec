@@ -49,9 +49,14 @@ public class VideoTrack extends Track {
 			else if(type==BoxTypes.ENCRYPTED_VIDEO_SAMPLE_ENTRY||type==BoxTypes.DRMS_SAMPLE_ENTRY) {
 				findDecoderSpecificInfo((ESDBox) sampleEntry.getChild(BoxTypes.ESD_BOX));
 				protection = Protection.parse(sampleEntry.getChild(BoxTypes.PROTECTION_SCHEME_INFORMATION_BOX));
+			} else {
+				for (int i = 0; i < sampleEntry.getChildren().size(); i++){
+					if (sampleEntry.getChildren().get(i) instanceof CodecSpecificBox){
+						decoderInfo = DecoderInfo.parse((CodecSpecificBox)sampleEntry.getChildren().get(0));
+						break;
+					}
+				}
 			}
-			else decoderInfo = DecoderInfo.parse((CodecSpecificBox) sampleEntry.getChildren().get(0));
-
 			codec = VideoCodec.forType(sampleEntry.getType());
 		}
 		else {
