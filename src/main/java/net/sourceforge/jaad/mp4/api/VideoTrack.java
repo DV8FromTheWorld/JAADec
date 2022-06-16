@@ -52,7 +52,7 @@ public class VideoTrack extends Track {
 			} else {
 				for (int i = 0; i < sampleEntry.getChildren().size(); i++){
 					if (sampleEntry.getChildren().get(i) instanceof CodecSpecificBox){
-						decoderInfo = DecoderInfo.parse((CodecSpecificBox)sampleEntry.getChildren().get(0));
+						decoderInfo = DecoderInfo.parse((CodecSpecificBox)sampleEntry.getChildren().get(i));
 						break;
 					}
 				}
